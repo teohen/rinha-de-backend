@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"os"
 
@@ -35,11 +34,11 @@ func main() {
 
 	defer dbPool.Close()
 
-	server := NewServer(dbPool)
+	server := routes.NewServer(dbPool)
 
 	log.Printf("Server running")
 
-	err = server.server.ListenAndServe()
+	err = server.Server.ListenAndServe()
 
 	if err != nil {
 		log.Fatal("Couldnt create server: ", err)

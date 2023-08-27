@@ -1,5 +1,7 @@
 package domain
 
+import "github.com/google/uuid"
+
 type Pessoa struct {
 	UUID       uuid.UUID `json:"id"`
 	Apelido    string    `json:"apelido"`

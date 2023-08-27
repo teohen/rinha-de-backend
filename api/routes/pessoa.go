@@ -7,36 +7,36 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/teohen/rinha-de-backend/api/handler"
+	"github.com/teohen/rinha-de-backend/internal/pessoa"
 )
 
-type serverAPi struct {
-	server *http.Server
-	repo   *pessoaDBImpl
+type ServerAPI struct {
+	Server *http.Server
 }
 
-func NewServer(conn *pgxpool.Pool) *serverAPi {
+func NewServer(conn *pgxpool.Pool) *ServerAPI {
 
 	port := os.Getenv("HTTP_PORT")
 
 	router := chi.NewRouter()
 
+	repository := pessoa.NewPessoaRepository(conn)
+
+	service := pessoa.NewService(repository)
+
+	handler := handler.NewPessoaHandler(service)
+
 	router.Use(middleware.Logger)
 
-	pessoaDB := pessoaDBImpl{
-		dbPool: conn,
-	}
+	router.Get("/teste", handler.Test)
 
-	api := &serverAPi{
-		server: &http.Server{
+	api := &ServerAPI{
+		Server: &http.Server{
 			Handler: router,
 			Addr:    ":" + port,
 		},
-		repo: &pessoaDB,
 	}
 
-	router.Post("/pessoas", api.HandlerPostPessoa)
-	router.Post("/test", api.test)
-
 	return api
-
 }

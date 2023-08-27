@@ -4,35 +4,30 @@ import (
 	"context"
 	"fmt"
 
-
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/teohen/rinha-de-backend/internal/domain"
 )
 
-type PessoaDB interface {
-	create(ctx context.Context, pessoa Pessoa) (error, uuid.UUID)
-	get(ctx context.Context, id uuid.UUID) (error, Pessoa)
-	find(ctx context.Context, query string) ([]Pessoa, error)
-}
-
-type PessoaModel struct {
-	store PessoaDB
+type Repository interface {
+	Create(ctx context.Context, pessoa domain.Pessoa) (error, uuid.UUID)
+	Test(ctx context.Context)
 }
 
 type pessoaRepository struct {
-	dbPool *pgxpool.Pool
+	db *pgxpool.Pool
 }
 
 func NewPessoaRepository(db *pgxpool.Pool) Repository {
-	return &pessoaRepository {
-		db
+	return &pessoaRepository{
+		db: db,
 	}
 }
 
-func (p *pessoaDBImpl) create(ctx context.Context, pessoa Pessoa) (error, uuid.UUID) {
+func (p *pessoaRepository) Create(ctx context.Context, pessoa domain.Pessoa) (error, uuid.UUID) {
 	insert := "INSERT INTO pessoas (apelido, uid, nome, nascimento, stack) VALUES ($1, $2, $3, $4, $5) ON CONFLICT DO NOTHING returnin uid;"
 
-	err := p.dbPool.QueryRow(ctx, insert, pessoa.Apelido, pessoa.UUID, pessoa.Nome, pessoa.Nascimento, pessoa.Stack).Scan(&pessoa.UUID)
+	err := p.db.QueryRow(ctx, insert, pessoa.Apelido, pessoa.UUID, pessoa.Nome, pessoa.Nascimento, pessoa.Stack).Scan(&pessoa.UUID)
 
 	if err != nil {
 		return fmt.Errorf("create pessoa: %w", err), uuid.Nil
@@ -41,46 +36,13 @@ func (p *pessoaDBImpl) create(ctx context.Context, pessoa Pessoa) (error, uuid.U
 	return nil, pessoa.UUID
 }
 
-func (p *pessoaDBImpl) get(ctx context.Context, id uuid.UUID) (error, Pessoa) {
-	var pessoa Pessoa
-	get := "SELECT apelido, uid, nome, nascimento, stack FROM pessoas WHERE uid = $1"
+func (p *pessoaRepository) Test(ctx context.Context) {
+	var prim int
+	var seg int
 
-	err := p.dbPool.QueryRow(ctx, get, id).Scan(&pessoa.Apelido, &pessoa.UUID, &pessoa.Nome, &pessoa.Nascimento, &pessoa.Stack)
-
-	if err != nil {
-		return fmt.Errorf("get pessoa: %w", err), pessoa
-	}
-
-	return nil, pessoa
-}
-
-func (p *pessoaDBImpl) find(ctx context.Context, query string) (error, []Pessoa) {
-	var pessoas []Pessoa
-
-	find := "SELECT apelido, uid, nome, nascimento, stack FROM pessoas ilike $1 limit 50"
-
-	rows, err := p.dbPool.Query(ctx, find, "%"+query+"%")
+	err := p.db.QueryRow(ctx, "SELECT * FROM (VALUES (1,2), (3,4)) t1 (c1, c2))").Scan(&prim, &seg)
 
 	if err != nil {
-		return fmt.Errorf("find pessoas: %w", err), pessoas
+		fmt.Println("ERRO NO SQL", err)
 	}
-
-	defer rows.Close()
-
-	for rows.Next() {
-		var pessoa Pessoa
-		err := rows.Scan(&pessoa.Apelido, &pessoa.UUID, &pessoa.Nome, &pessoa.Nascimento, &pessoa.Stack)
-
-		if err != nil {
-			return fmt.Errorf("Scanning pessoa: %w", err), pessoas
-		}
-
-		pessoas = append(pessoas, pessoa)
-	}
-
-	if err := rows.Err(); err != nil {
-		return fmt.Errorf("for loop over pessoas: %w", err), pessoas
-	}
-
-	return nil, pessoas
 }

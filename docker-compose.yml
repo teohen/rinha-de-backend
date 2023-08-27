@@ -1,7 +1,7 @@
 version: '3.5'
 services:
   api1: # API - Instância 01
-    image: teohen/rinha-de-backend:local
+    image: teohen/rinha-de-backend:latest
     hostname: api1
     environment:
       - HTTP_PORT=8081
@@ -10,6 +10,8 @@ services:
         - postgres
     expose:
         - "8081"
+    volumes:
+      - ./db.sql:/docker-entrypoint-initdb.d/db.sql
     deploy:
       resources:
         limits:
@@ -17,7 +19,7 @@ services:
           memory: '0.5GB'
 
   api2: # API - Instância 01
-    image: teohen/rinha-de-backend:local
+    image: teohen/rinha-de-backend:latest
     hostname: api2
     depends_on:
       - postgres
@@ -51,16 +53,19 @@ services:
     image: postgres:latest
     hostname: postgres
     container_name: postgres-rinha-de-backend
+    volumes:
+      - ./db.sql:/docker-entrypoint-initdb.d/db.sql
     environment:
       PG_USER: postgres
       PG_PASSWORD: postgres
       PG_DB: rinhadebackend
       PGDATA: /var/lib/postgresql/data
+      POSTGRES_HOST_AUTH_METHOD: "trust"
     deploy:
       resources:
         limits:
           cpus: '0.75'
           memory: '1.5GB'
     ports:
-      - "5432:5432"
+      - "5431:5431"
   
