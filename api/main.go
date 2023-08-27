@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"os"
 
@@ -14,27 +15,25 @@ func main() {
 
 	godotenv.Load()
 
-	dbURL := os.Getenv("DB_URL")
+	var psqlconn string = fmt.Sprintf("host=%s user=%s password=%s dbname=%s sslmode=disable", os.Getenv("DB_HOST"),
+		os.Getenv("DB_USER"), os.Getenv("DB_PASSWORD"), os.Getenv("DB_NAME"))
 
-	if dbURL == "" {
-		log.Fatal("Couldnt find DB_URL")
-	}
-
-	config, err := pgxpool.ParseConfig(dbURL)
+	fmt.Println("SSS", psqlconn)
+	poolConfig, err := pgxpool.ParseConfig(psqlconn)
 
 	if err != nil {
 		log.Fatal("Couldn parse config", err)
 	}
 
-	dbPool, err := pgxpool.NewWithConfig(context.Background(), config)
+	db, err := pgxpool.NewWithConfig(context.Background(), poolConfig)
 
 	if err != nil {
 		log.Fatal("Couldnt create conn pool", err)
 	}
 
-	defer dbPool.Close()
+	defer db.Close()
 
-	server := routes.NewServer(dbPool)
+	server := routes.NewServer(db)
 
 	log.Printf("Server running")
 

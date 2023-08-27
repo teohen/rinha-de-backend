@@ -37,12 +37,13 @@ func (p *pessoaRepository) Create(ctx context.Context, pessoa domain.Pessoa) (er
 }
 
 func (p *pessoaRepository) Test(ctx context.Context) {
-	var prim int
 	var seg int
 
-	err := p.db.QueryRow(ctx, "SELECT * FROM (VALUES (1,2), (3,4)) t1 (c1, c2))").Scan(&prim, &seg)
+	err := p.db.QueryRow(ctx, "SELECT 1 + 2 AS result;").Scan(&seg)
 
 	if err != nil {
 		fmt.Println("ERRO NO SQL", err)
 	}
+
+	fmt.Println("SEG", seg)
 }
