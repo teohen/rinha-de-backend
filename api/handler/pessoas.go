@@ -104,7 +104,6 @@ func (phandler *pessoaHandler) Get(w http.ResponseWriter, r *http.Request) {
 }
 
 func (phandler *pessoaHandler) Search(w http.ResponseWriter, r *http.Request) {
-	// TODO: adds suport for querying on the apelido, nome ou stack
 	term := r.URL.Query().Get("t")
 
 	if term == "" {
