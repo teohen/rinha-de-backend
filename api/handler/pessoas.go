@@ -73,6 +73,7 @@ func (phandler *pessoaHandler) Create(w http.ResponseWriter, r *http.Request) {
 		respondWithError(w, 500, "internal server error")
 	}
 
+	w.Header().Add("Location", fmt.Sprintf("/pessoas/%s", pessoaUid))
 	respondWithJSON(w, 201, pessoaUid)
 }
 

@@ -30,10 +30,10 @@ func NewPessoaRepository(db *pgxpool.Pool) Repository {
 
 func (p *pessoaRepository) Create(ctx context.Context, pessoa domain.Pessoa) (error, uuid.UUID) {
 
-	//stack := strings.Join(pessoa.Stack, ",")
+	stack := strings.Join(pessoa.Stack, ",")
 	insert := "INSERT INTO pessoas (apelido, id, nome, nascimento, stack) VALUES ($1, $2, $3, $4, $5) ON CONFLICT DO NOTHING returning id;"
 
-	err := p.db.QueryRow(ctx, insert, pessoa.Apelido, pessoa.UUID, pessoa.Nome, pessoa.Nascimento, pessoa.Stack).Scan(&pessoa.UUID)
+	err := p.db.QueryRow(ctx, insert, pessoa.Apelido, pessoa.UUID, pessoa.Nome, pessoa.Nascimento, stack).Scan(&pessoa.UUID)
 
 	if err != nil {
 		return fmt.Errorf("create pessoa: %w", err), uuid.Nil
