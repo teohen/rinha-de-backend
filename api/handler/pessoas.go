@@ -32,6 +32,7 @@ type Handler interface {
 	Create(w http.ResponseWriter, r *http.Request)
 	Get(w http.ResponseWriter, r *http.Request)
 	Search(w http.ResponseWriter, r *http.Request)
+	Count(w http.ResponseWriter, r *http.Request)
 }
 
 type pessoaHandler struct {
@@ -108,6 +109,19 @@ func (phandler *pessoaHandler) Search(w http.ResponseWriter, r *http.Request) {
 	}
 
 	respondWithJSON(w, 200, pessoaList)
+	return
+}
+
+func (phandler *pessoaHandler) Count(w http.ResponseWriter, r *http.Request) {
+
+	err, count := phandler.service.Count(context.Background())
+	if err != nil {
+		fmt.Println("Error no count", err)
+		respondWithError(w, 500, "internal server error")
+		return
+	}
+
+	respondWithJSON(w, 200, count)
 	return
 }
 

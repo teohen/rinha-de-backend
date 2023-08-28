@@ -15,6 +15,7 @@ type Repository interface {
 	Test(ctx context.Context)
 	Get(ctx context.Context, id uuid.UUID) (error, domain.Pessoa)
 	Search(ctx context.Context, term string) (error, []domain.Pessoa)
+	Count(ctx context.Context) (error, int)
 }
 
 type pessoaRepository struct {
@@ -77,6 +78,19 @@ func (p *pessoaRepository) Search(ctx context.Context, term string) (error, []do
 	}
 
 	return nil, pessoas
+}
+
+func (p *pessoaRepository) Count(ctx context.Context) (error, int) {
+	var count int
+
+	err := p.db.QueryRow(ctx, "SELECT count(id) from pessoas").Scan(&count)
+
+	if err != nil {
+		fmt.Println("count", err)
+		return err, 0
+	}
+
+	return nil, count
 }
 
 func (p *pessoaRepository) Test(ctx context.Context) {

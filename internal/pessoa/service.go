@@ -11,6 +11,7 @@ type Service interface {
 	Create(ctx context.Context, pessoa domain.Pessoa) (error, uuid.UUID)
 	Get(ctx context.Context, uid uuid.UUID) (error, domain.Pessoa)
 	Search(ctx context.Context, term string) (error, []domain.Pessoa)
+	Count(ctx context.Context) (error, int)
 	Test(ctx context.Context)
 }
 
@@ -52,6 +53,16 @@ func (p *pessoaService) Search(ctx context.Context, term string) (error, []domai
 
 	return nil, pessoaList
 
+}
+
+func (p *pessoaService) Count(ctx context.Context) (error, int) {
+	err, count := p.repository.Count(ctx)
+
+	if err != nil {
+		return err, 0
+	}
+
+	return nil, count
 }
 
 func (p *pessoaService) Test(ctx context.Context) {
