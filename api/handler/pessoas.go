@@ -107,6 +107,11 @@ func (phandler *pessoaHandler) Search(w http.ResponseWriter, r *http.Request) {
 	// TODO: adds suport for querying on the apelido, nome ou stack
 	term := r.URL.Query().Get("t")
 
+	if term == "" {
+		respondWithError(w, 400, "t query string is required")
+		return
+	}
+
 	err, pessoaList := phandler.service.Search(context.Background(), term)
 
 	if pessoaList == nil {
