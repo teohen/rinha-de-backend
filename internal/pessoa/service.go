@@ -10,6 +10,7 @@ import (
 type Service interface {
 	Create(ctx context.Context, pessoa domain.Pessoa) (error, uuid.UUID)
 	Get(ctx context.Context, uid uuid.UUID) (error, domain.Pessoa)
+	Search(ctx context.Context, term string) (error, []domain.Pessoa)
 	Test(ctx context.Context)
 }
 

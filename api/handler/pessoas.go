@@ -31,6 +31,7 @@ type Handler interface {
 	Test(w http.ResponseWriter, r *http.Request)
 	Create(w http.ResponseWriter, r *http.Request)
 	Get(w http.ResponseWriter, r *http.Request)
+	Search(w http.ResponseWriter, r *http.Request)
 }
 
 type pessoaHandler struct {
@@ -92,6 +93,21 @@ func (phandler *pessoaHandler) Get(w http.ResponseWriter, r *http.Request) {
 	}
 
 	respondWithJSON(w, 200, pessoa)
+	return
+}
+
+func (phandler *pessoaHandler) Search(w http.ResponseWriter, r *http.Request) {
+	term := r.URL.Query().Get("t")
+
+	err, pessoaList := phandler.service.Search(context.Background(), term)
+
+	if err != nil {
+		fmt.Println("Error:", err)
+		respondWithError(w, 500, "internal server error")
+		return
+	}
+
+	respondWithJSON(w, 200, pessoaList)
 	return
 }
 

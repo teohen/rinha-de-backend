@@ -32,6 +32,7 @@ func NewServer(conn *pgxpool.Pool) *ServerAPI {
 	router.Get("/teste", handler.Test)
 	router.Post("/pessoas", handler.Create)
 	router.Get("/pessoas/{id}", handler.Get)
+	router.Get("/pessoas", handler.Search)
 
 	api := &ServerAPI{
 		Server: &http.Server{

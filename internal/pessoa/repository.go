@@ -67,10 +67,12 @@ func (p *pessoaRepository) Search(ctx context.Context, term string) (error, []do
 	}
 
 	var pessoas []domain.Pessoa
+	var stack string
 
 	for rows.Next() {
 		p := domain.Pessoa{}
-		_ = rows.Scan(&p.UUID, &p.Apelido, &p.Nome, &p.Nascimento, &p.Stack)
+		_ = rows.Scan(&p.UUID, &p.Apelido, &p.Nome, &p.Nascimento, &stack)
+		p.Stack = strings.Split(stack, ",")
 		pessoas = append(pessoas, p)
 	}
 
