@@ -94,11 +94,17 @@ func (phandler *pessoaHandler) Get(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if pessoa.Nome == "" {
+		respondWithError(w, 404, "Not Found")
+		return
+	}
+
 	respondWithJSON(w, 200, pessoa)
 	return
 }
 
 func (phandler *pessoaHandler) Search(w http.ResponseWriter, r *http.Request) {
+	// TODO: adds suport for querying on the apelido, nome ou stack
 	term := r.URL.Query().Get("t")
 
 	err, pessoaList := phandler.service.Search(context.Background(), term)

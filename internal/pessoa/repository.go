@@ -48,13 +48,20 @@ func (p *pessoaRepository) Get(ctx context.Context, id uuid.UUID) (error, domain
 	var stack string
 	get := "SELECT apelido, id, nome, nascimento, stack::varchar FROM pessoas WHERE id = $1"
 
-	err := p.db.QueryRow(ctx, get, id).Scan(&pessoa.Apelido, &pessoa.UUID, &pessoa.Nome, &pessoa.Nascimento, &stack)
+	row := p.db.QueryRow(ctx, get, id)
 
-	pessoa.Stack = strings.Split(stack, ",")
+	err := row.Scan(&pessoa.Apelido, &pessoa.UUID, &pessoa.Nome, &pessoa.Nascimento, &stack)
 
 	if err != nil {
-		return fmt.Errorf("get pessoa: %w", err), pessoa
+		if err.Error() == "no rows in result set" {
+			return nil, domain.Pessoa{}
+		}
+		if err != nil {
+			return fmt.Errorf("get pessoa: %w", err), pessoa
+		}
 	}
+
+	pessoa.Stack = strings.Split(stack, ",")
 
 	return nil, pessoa
 }
