@@ -102,6 +102,10 @@ func (phandler *pessoaHandler) Search(w http.ResponseWriter, r *http.Request) {
 
 	err, pessoaList := phandler.service.Search(context.Background(), term)
 
+	if pessoaList == nil {
+		pessoaList = []domain.Pessoa{}
+	}
+
 	if err != nil {
 		fmt.Println("Error:", err)
 		respondWithError(w, 500, "internal server error")
