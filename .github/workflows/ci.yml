@@ -4,8 +4,8 @@ on:
   push:
     branches: [ main ]
   pull_request:
-    branches: [ main ]
-
+    branches: [main]
+    types: [close]
 jobs:
   build:
     runs-on: ubuntu-20.04
@@ -14,6 +14,7 @@ jobs:
       - name: Build
         run: docker build . -t rinha-de-backend-2023-q3
   test:
+    if: ${{ github.event.pull_request.merged }}
     runs-on: ubuntu-20.04
     needs: build
     permissions:
