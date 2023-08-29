@@ -2,11 +2,13 @@ package pessoa
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"strings"
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/redis/rueidis"
 	"github.com/teohen/rinha-de-backend/internal/domain"
 )
 
@@ -19,12 +21,14 @@ type Repository interface {
 }
 
 type pessoaRepository struct {
-	db *pgxpool.Pool
+	db    *pgxpool.Pool
+	cache rueidis.Client
 }
 
-func NewPessoaRepository(db *pgxpool.Pool) Repository {
+func NewPessoaRepository(db *pgxpool.Pool, redis rueidis.Client) Repository {
 	return &pessoaRepository{
-		db: db,
+		db:    db,
+		cache: redis,
 	}
 }
 
@@ -98,6 +102,20 @@ func (p *pessoaRepository) Count(ctx context.Context) (error, int) {
 	}
 
 	return nil, count
+}
+
+func (p *pessoaRepository) SaveCache(ctx context.Context, pessoa domain.Pessoa) error {
+	pessoaMarshall, err := json.Marshal(pessoa)
+	if err != nil {
+		fmt.Println("Error marshalling pessoa struct", err)
+		return err
+	}
+
+	pessoaString := string(pessoaMarshall)
+	p.cache.B().Set().Key("pessoa:id:" + pessoa.UUID.String()).Value(pessoaString)
+	p.cache.B().Set().Key("pessoa:apelido:" + pessoa.Apelido).Value(pessoaString)
+
+	return nil
 }
 
 func (p *pessoaRepository) Test(ctx context.Context) {

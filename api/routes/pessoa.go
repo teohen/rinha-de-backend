@@ -7,6 +7,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/redis/rueidis"
 	"github.com/teohen/rinha-de-backend/api/handler"
 	"github.com/teohen/rinha-de-backend/internal/pessoa"
 )
@@ -15,13 +16,13 @@ type ServerAPI struct {
 	Server *http.Server
 }
 
-func NewServer(conn *pgxpool.Pool) *ServerAPI {
+func NewServer(conn *pgxpool.Pool, redis rueidis.Client) *ServerAPI {
 
 	port := os.Getenv("HTTP_PORT")
 
 	router := chi.NewRouter()
 
-	repository := pessoa.NewPessoaRepository(conn)
+	repository := pessoa.NewPessoaRepository(conn, redis)
 
 	service := pessoa.NewService(repository)
 

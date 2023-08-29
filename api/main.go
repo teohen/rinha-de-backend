@@ -8,6 +8,7 @@ import (
 
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/joho/godotenv"
+	"github.com/redis/rueidis"
 	"github.com/teohen/rinha-de-backend/api/routes"
 )
 
@@ -31,9 +32,11 @@ func main() {
 		log.Fatal("Couldnt create conn pool", err)
 	}
 
+	redisClient, err := rueidis.NewClient(rueidis.ClientOption{InitAddress: []string{"cache:6379"}})
+
 	defer db.Close()
 
-	server := routes.NewServer(db)
+	server := routes.NewServer(db, redisClient)
 
 	log.Printf("Server running")
 
