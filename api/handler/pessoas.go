@@ -20,14 +20,6 @@ type PessoaRequest struct {
 	Stack      []string `json:"stack"`
 }
 
-type PessoaResponse struct {
-	ID         string   `json:"id"`
-	Apelido    string   `json:"apelido"`
-	Nome       string   `json:"nome"`
-	Nascimento string   `json:"nascimento"`
-	Stack      []string `json:"stack"`
-}
-
 type Handler interface {
 	Test(w http.ResponseWriter, r *http.Request)
 	Create(w http.ResponseWriter, r *http.Request)
