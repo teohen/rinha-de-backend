@@ -53,6 +53,11 @@ func (phandler *pessoaHandler) Create(w http.ResponseWriter, r *http.Request) {
 
 	err := decoder.Decode(&pessoaParams)
 
+	if err != nil {
+		respondWithError(w, http.StatusBadRequest, "Bad Request")
+		return
+	}
+
 	newPessoa := domain.Pessoa{
 		Apelido:    pessoaParams.Apelido,
 		Nome:       pessoaParams.Nome,
@@ -183,11 +188,9 @@ func validate(validations []bool) bool {
 }
 
 func validateStack(stack []string) bool {
-	fmt.Println(stack)
 	valid := true
 	if len(stack) > 0 {
 		for _, item := range stack {
-			fmt.Println("fsf", item != "")
 			validations := []bool{item != "", len(item) <= 32}
 			if validate(validations) == false {
 				valid = false
