@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
@@ -13,18 +14,18 @@ import (
 )
 
 type PessoaRequest struct {
-	Apelido    string   `json:"apelido" validate:"required, max=32"`
-	Nome       string   `json:"nome" validate:"required, max=100"`
-	Nascimento string   `json:"nascimento" validate:"required, datetime=2020-01-01"`
-	Stack      []string `json:"stack" validate:"dive,max=32"`
+	Apelido    string   `json:"apelido"`
+	Nome       string   `json:"nome"`
+	Nascimento string   `json:"nascimento"`
+	Stack      []string `json:"stack"`
 }
 
 type PessoaResponse struct {
 	ID         string   `json:"id"`
-	Apelido    string   `json:"apelido" validate:"required,max=32"`
-	Nome       string   `json:"nome" validate:"required,max=100"`
-	Nascimento string   `json:"nascimento" validate:"required,datetime=2006-01-02"`
-	Stack      []string `json:"stack" validate:"dive,max=32"`
+	Apelido    string   `json:"apelido"`
+	Nome       string   `json:"nome"`
+	Nascimento string   `json:"nascimento"`
+	Stack      []string `json:"stack"`
 }
 
 type Handler interface {
@@ -57,6 +58,28 @@ func (phandler *pessoaHandler) Create(w http.ResponseWriter, r *http.Request) {
 		Nome:       pessoaParams.Nome,
 		Nascimento: pessoaParams.Nascimento,
 		Stack:      pessoaParams.Stack,
+	}
+
+	validations := []bool{
+		newPessoa.Nome != "",
+		len(newPessoa.Nome) <= 100,
+		newPessoa.Apelido != "",
+		len(newPessoa.Apelido) <= 32,
+		newPessoa.Nascimento != ""}
+
+	valid := validate(validations)
+
+	_, err = time.Parse("2006-01-02", newPessoa.Nascimento)
+
+	if err != nil {
+		valid = false
+	}
+
+	valid = validateStack(newPessoa.Stack)
+
+	if valid == false {
+		respondWithError(w, http.StatusUnprocessableEntity, "unprocessable entity")
+		return
 	}
 
 	newPessoa.UUID = uuid.New()
@@ -146,4 +169,32 @@ func (phandler *pessoaHandler) Test(w http.ResponseWriter, r *http.Request) {
 
 	fmt.Println("sfkdsjfskfj")
 	w.WriteHeader(303)
+}
+
+func validate(validations []bool) bool {
+	valid := true
+	for _, validation := range validations {
+		if validation == false {
+			valid = false
+		}
+	}
+
+	return valid
+}
+
+func validateStack(stack []string) bool {
+	fmt.Println(stack)
+	valid := true
+	if len(stack) > 0 {
+		for _, item := range stack {
+			fmt.Println("fsf", item != "")
+			validations := []bool{item != "", len(item) <= 32}
+			if validate(validations) == false {
+				valid = false
+				break
+			}
+
+		}
+	}
+	return valid
 }

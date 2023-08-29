@@ -43,4 +43,18 @@ func main() {
 		log.Fatal("Couldnt create server: ", err)
 	}
 
+	// TODO: fix the create route for cases:
+
+	// apelido: required, unique, string 32 chars
+	// nome: required, string 100 chars
+	// nascimento: required, format YYYY-MM-DD
+	// stack: optional, each elem string 32 chars
+	// 422:
+	// - apelido unique
+	// - nao aceitar nulo em nome e apelido e nascimento
+
+	// 400:
+
+	// - stack only strings acceptable
+
 }
