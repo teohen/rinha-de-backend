@@ -42,5 +42,4 @@ func main() {
 	if err != nil {
 		log.Fatal("Couldnt create server: ", err)
 	}
-
 }
