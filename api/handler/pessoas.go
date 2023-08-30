@@ -149,7 +149,6 @@ func (phandler *pessoaHandler) Test(w http.ResponseWriter, r *http.Request) {
 
 	phandler.service.Test(context.Background())
 
-	fmt.Println("sfkdsjfskfj")
 	w.WriteHeader(303)
 }
 
@@ -185,11 +184,9 @@ func checkValidations(validations []bool) bool {
 	valid := true
 	for _, validation := range validations {
 		if validation == false {
-			fmt.Println("FALSE CARALHO")
 			valid = false
 		}
 	}
-	fmt.Println(" no final", valid)
 	return valid
 }
 
