@@ -36,6 +36,8 @@ func main() {
 
 	defer db.Close()
 
+	defer redisClient.Close()
+
 	server := routes.NewServer(db, redisClient)
 
 	log.Printf("Server running")
