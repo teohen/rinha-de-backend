@@ -57,22 +57,7 @@ func (phandler *pessoaHandler) Create(w http.ResponseWriter, r *http.Request) {
 		Stack:      pessoaParams.Stack,
 	}
 
-	validations := []bool{
-		newPessoa.Nome != "",
-		len(newPessoa.Nome) <= 100,
-		newPessoa.Apelido != "",
-		len(newPessoa.Apelido) <= 32,
-		newPessoa.Nascimento != ""}
-
-	valid := validate(validations)
-
-	_, err = time.Parse("2006-01-02", newPessoa.Nascimento)
-
-	if err != nil {
-		valid = false
-	}
-
-	valid = validateStack(newPessoa.Stack)
+	valid := validate(newPessoa)
 
 	if valid == false {
 		respondWithError(w, http.StatusUnprocessableEntity, "unprocessable entity")
@@ -168,14 +153,43 @@ func (phandler *pessoaHandler) Test(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(303)
 }
 
-func validate(validations []bool) bool {
+func validate(pessoa domain.Pessoa) bool {
+	validations := []bool{
+		pessoa.Nome != "",
+		len([]rune(pessoa.Nome)) <= 100,
+		pessoa.Apelido != "",
+		len([]rune(pessoa.Apelido)) <= 32,
+		pessoa.Nascimento != ""}
+
+	valid := checkValidations(validations)
+
+	if valid == false {
+		return false
+	}
+
+	_, err := time.Parse("2006-01-02", pessoa.Nascimento)
+
+	if err != nil {
+		return false
+	}
+
+	valid = validateStack(pessoa.Stack)
+
+	if valid == false {
+		return false
+	}
+	return true
+}
+
+func checkValidations(validations []bool) bool {
 	valid := true
 	for _, validation := range validations {
 		if validation == false {
+			fmt.Println("FALSE CARALHO")
 			valid = false
 		}
 	}
-
+	fmt.Println(" no final", valid)
 	return valid
 }
 
@@ -184,7 +198,7 @@ func validateStack(stack []string) bool {
 	if len(stack) > 0 {
 		for _, item := range stack {
 			validations := []bool{item != "", len(item) <= 32}
-			if validate(validations) == false {
+			if checkValidations(validations) == false {
 				valid = false
 				break
 			}
