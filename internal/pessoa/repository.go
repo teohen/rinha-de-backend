@@ -2,11 +2,14 @@ package pessoa
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/redis/rueidis"
 	"github.com/teohen/rinha-de-backend/internal/domain"
 )
 
@@ -16,15 +19,19 @@ type Repository interface {
 	Get(ctx context.Context, id uuid.UUID) (error, domain.Pessoa)
 	Search(ctx context.Context, term string) (error, []domain.Pessoa)
 	Count(ctx context.Context) (error, int)
+	SaveCache(ctx context.Context, pessoa domain.Pessoa) error
+	GetCache(ctx context.Context, key string) (error, domain.Pessoa)
 }
 
 type pessoaRepository struct {
-	db *pgxpool.Pool
+	db    *pgxpool.Pool
+	cache rueidis.Client
 }
 
-func NewPessoaRepository(db *pgxpool.Pool) Repository {
+func NewPessoaRepository(db *pgxpool.Pool, redis rueidis.Client) Repository {
 	return &pessoaRepository{
-		db: db,
+		db:    db,
+		cache: redis,
 	}
 }
 
@@ -98,6 +105,39 @@ func (p *pessoaRepository) Count(ctx context.Context) (error, int) {
 	}
 
 	return nil, count
+}
+
+func (p *pessoaRepository) SaveCache(ctx context.Context, pessoa domain.Pessoa) error {
+	pessoaMarshall, err := json.Marshal(pessoa)
+	if err != nil {
+		fmt.Println("Error marshalling pessoa struct", err)
+		return err
+	}
+
+	pessoaString := string(pessoaMarshall)
+
+	err = p.cache.Do(ctx, p.cache.B().Set().Key("pessoa:id:"+pessoa.UUID.String()).Value(pessoaString).Build()).Error()
+	err = p.cache.Do(ctx, p.cache.B().Set().Key("pessoa:apelido:"+pessoa.Apelido).Value(pessoaString).Build()).Error()
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (p *pessoaRepository) GetCache(ctx context.Context, key string) (error, domain.Pessoa) {
+	value, err := p.cache.DoCache(ctx, p.cache.B().Get().Key(key).Cache(), time.Minute).AsBytes()
+
+	var pessoa domain.Pessoa
+
+	err = json.Unmarshal(value, &pessoa)
+
+	if err != nil {
+		return err, domain.Pessoa{}
+	}
+
+	return nil, pessoa
 }
 
 func (p *pessoaRepository) Test(ctx context.Context) {

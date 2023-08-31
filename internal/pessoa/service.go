@@ -2,6 +2,8 @@ package pessoa
 
 import (
 	"context"
+	"errors"
+	"fmt"
 
 	"github.com/google/uuid"
 	"github.com/teohen/rinha-de-backend/internal/domain"
@@ -26,6 +28,14 @@ func NewService(r Repository) Service {
 }
 
 func (p *pessoaService) Create(ctx context.Context, pessoa domain.Pessoa) (error, uuid.UUID) {
+	err, pessoaCache := p.repository.GetCache(ctx, "pessoa:apelido:"+pessoa.Apelido)
+
+	if pessoaCache.Apelido != "" {
+		return errors.New("pessoa already exists"), uuid.UUID{}
+	}
+
+	p.repository.SaveCache(ctx, pessoa)
+
 	err, uidPessoa := p.repository.Create(ctx, pessoa)
 
 	if err != nil {
@@ -36,7 +46,19 @@ func (p *pessoaService) Create(ctx context.Context, pessoa domain.Pessoa) (error
 }
 
 func (p *pessoaService) Get(ctx context.Context, uid uuid.UUID) (error, domain.Pessoa) {
+	err, pessoaCache := p.repository.GetCache(ctx, "pessoa:id:"+uid.String())
+
+	if err != nil {
+		fmt.Println("service error: ", err)
+		return err, domain.Pessoa{}
+	}
+
+	if pessoaCache.Apelido != "" {
+		return nil, pessoaCache
+	}
+
 	err, pessoa := p.repository.Get(ctx, uid)
+
 	if err != nil {
 		return err, domain.Pessoa{}
 	}

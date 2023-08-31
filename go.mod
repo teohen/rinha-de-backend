@@ -7,6 +7,7 @@ require (
 	github.com/google/uuid v1.3.1
 	github.com/jackc/pgx/v5 v5.4.3
 	github.com/joho/godotenv v1.5.1
+	github.com/redis/rueidis v1.0.16
 )
 
 require (
@@ -16,5 +17,5 @@ require (
 	github.com/stretchr/testify v1.8.2 // indirect
 	golang.org/x/crypto v0.9.0 // indirect
 	golang.org/x/sync v0.1.0 // indirect
-	golang.org/x/text v0.9.0 // indirect
+	golang.org/x/text v0.11.0 // indirect
 )

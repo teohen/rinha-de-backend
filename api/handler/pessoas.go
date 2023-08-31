@@ -66,16 +66,16 @@ func (phandler *pessoaHandler) Create(w http.ResponseWriter, r *http.Request) {
 
 	newPessoa.UUID = uuid.New()
 
-	if err != nil {
-		respondWithError(w, 400, fmt.Sprintf("Error parsing json: %s", err))
-		return
-	}
-
 	err, pessoaUid := phandler.service.Create(context.Background(), newPessoa)
 
 	if err != nil {
 		fmt.Println("Error:", err)
+		if err.Error() == "pessoa already exists" {
+			respondWithError(w, http.StatusUnprocessableEntity, "unprocessable entity")
+			return
+		}
 		respondWithError(w, 500, "internal server error")
+		return
 	}
 
 	w.Header().Add("Location", fmt.Sprintf("/pessoas/%s", pessoaUid))
