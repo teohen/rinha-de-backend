@@ -3,6 +3,7 @@ package routes
 import (
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
@@ -38,8 +39,10 @@ func NewServer(conn *pgxpool.Pool, redis rueidis.Client) *ServerAPI {
 
 	api := &ServerAPI{
 		Server: &http.Server{
-			Handler: router,
-			Addr:    ":" + port,
+			Handler:      router,
+			Addr:         ":" + port,
+			WriteTimeout: 5 * time.Minute,
+			ReadTimeout:  5 * time.Minute,
 		},
 	}
 

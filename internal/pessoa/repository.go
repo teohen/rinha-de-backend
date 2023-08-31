@@ -19,6 +19,8 @@ type Repository interface {
 	Get(ctx context.Context, id uuid.UUID) (error, domain.Pessoa)
 	Search(ctx context.Context, term string) (error, []domain.Pessoa)
 	Count(ctx context.Context) (error, int)
+	SaveCache(ctx context.Context, pessoa domain.Pessoa) error
+	GetCache(ctx context.Context, key string) (error, domain.Pessoa)
 }
 
 type pessoaRepository struct {
@@ -120,6 +122,7 @@ func (p *pessoaRepository) SaveCache(ctx context.Context, pessoa domain.Pessoa) 
 	if err != nil {
 		return err
 	}
+
 	return nil
 }
 

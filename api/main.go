@@ -19,7 +19,6 @@ func main() {
 	var psqlconn string = fmt.Sprintf("host=%s user=%s password=%s dbname=%s sslmode=disable", os.Getenv("DB_HOST"),
 		os.Getenv("DB_USER"), os.Getenv("DB_PASSWORD"), os.Getenv("DB_NAME"))
 
-	fmt.Println("SSS", psqlconn)
 	poolConfig, err := pgxpool.ParseConfig(psqlconn)
 
 	if err != nil {
@@ -32,7 +31,13 @@ func main() {
 		log.Fatal("Couldnt create conn pool", err)
 	}
 
-	redisClient, err := rueidis.NewClient(rueidis.ClientOption{InitAddress: []string{"cache:6379"}})
+	redisClient, err := rueidis.NewClient(
+		rueidis.ClientOption{InitAddress: []string{os.Getenv("REDIS_HOST") + ":6379"}},
+	)
+
+	if err != nil {
+		log.Fatal("Couldnt connect with redis", err)
+	}
 
 	defer db.Close()
 
