@@ -13,7 +13,7 @@ CREATE TABLE IF NOT EXISTS pessoas (
   apelido VARCHAR(32) UNIQUE NOT NULL,
   nome VARCHAR(100),
   nascimento CHAR(10) NOT NULL,
-  stack TEXT NULL
+  stack TEXT NULL,
   BUSCA_TRGM TEXT GENERATED ALWAYS AS (
   LOWER(nome) || LOWER(apelido) || LOWER(stack)
   ) STORED
