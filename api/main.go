@@ -25,6 +25,9 @@ func main() {
 		log.Fatal("Couldn parse config", err)
 	}
 
+	poolConfig.MaxConns = 150
+	poolConfig.MinConns = 100
+
 	db, err := pgxpool.NewWithConfig(context.Background(), poolConfig)
 
 	if err != nil {
