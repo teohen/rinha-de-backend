@@ -81,6 +81,8 @@ func (p *pessoaRepository) Search(ctx context.Context, term string) (error, []do
 		return err, nil
 	}
 
+	defer rows.Close()
+
 	var pessoas []domain.Pessoa
 	var stack string
 
