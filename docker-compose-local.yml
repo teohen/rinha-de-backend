@@ -10,10 +10,8 @@ services:
       - DB_PASSWORD=postgres
       - DB_NAME=rinhadebackend
       - DB_PORT=5432
-      - REDIS_HOST=cache
     depends_on:
         - postgres
-        - cache
     expose:
         - "8081"
     deploy:
@@ -28,7 +26,6 @@ services:
     hostname: api2
     depends_on:
       - postgres
-      - cache
     expose:
       - "8082"
     environment:
@@ -38,7 +35,6 @@ services:
       - DB_PASSWORD=postgres
       - DB_NAME=rinhadebackend
       - DB_PORT=5432
-      - REDIS_HOST=cache
     deploy:
       resources:
         limits:
@@ -79,16 +75,3 @@ services:
           memory: '1.5GB'
     ports:
       - "5431:5431"
-
-  cache:
-    hostname: cache
-    image: redis:latest
-    command: redis-server --save "" --appendonly no
-    ports:
-      - '6379:6379'
-    deploy:
-      resources:
-        limits:
-          cpus: '1.00'
-          memory: '1.5GB'
-

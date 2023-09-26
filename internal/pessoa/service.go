@@ -14,7 +14,7 @@ type Service interface {
 	Get(ctx context.Context, uid uuid.UUID) (error, domain.Pessoa)
 	Search(ctx context.Context, term string) (error, []domain.Pessoa)
 	Count(ctx context.Context) (error, int)
-	Test(ctx context.Context)
+	GetByApelido(ctx context.Context, apelido string) (error, domain.Pessoa)
 }
 
 type pessoaService struct {
@@ -28,13 +28,13 @@ func NewService(r Repository) Service {
 }
 
 func (p *pessoaService) Create(ctx context.Context, pessoa domain.Pessoa) (error, uuid.UUID) {
-	err, pessoaCache := p.repository.GetCache(ctx, "pessoa:apelido:"+pessoa.Apelido)
+	err, pessoaRegistered := p.repository.GetByApelido(ctx, pessoa.Apelido)
 
-	if pessoaCache.Apelido != "" {
-		return errors.New("pessoa already exists"), uuid.UUID{}
+	fmt.Println("pessoa registered", pessoaRegistered)
+	if pessoaRegistered.UUID != uuid.Nil {
+
+		return errors.New("pessoa already exists"), uuid.Nil
 	}
-
-	p.repository.SaveCache(ctx, pessoa)
 
 	err, uidPessoa := p.repository.Create(ctx, pessoa)
 
@@ -46,18 +46,17 @@ func (p *pessoaService) Create(ctx context.Context, pessoa domain.Pessoa) (error
 }
 
 func (p *pessoaService) Get(ctx context.Context, uid uuid.UUID) (error, domain.Pessoa) {
-	err, pessoaCache := p.repository.GetCache(ctx, "pessoa:id:"+uid.String())
+	err, pessoa := p.repository.Get(ctx, uid)
 
 	if err != nil {
-		fmt.Println("service error: ", err)
 		return err, domain.Pessoa{}
 	}
 
-	if pessoaCache.Apelido != "" {
-		return nil, pessoaCache
-	}
+	return nil, pessoa
+}
 
-	err, pessoa := p.repository.Get(ctx, uid)
+func (p *pessoaService) GetByApelido(ctx context.Context, apelido string) (error, domain.Pessoa) {
+	err, pessoa := p.repository.GetByApelido(ctx, apelido)
 
 	if err != nil {
 		return err, domain.Pessoa{}
@@ -85,8 +84,4 @@ func (p *pessoaService) Count(ctx context.Context) (error, int) {
 	}
 
 	return nil, count
-}
-
-func (p *pessoaService) Test(ctx context.Context) {
-	p.repository.Test(ctx)
 }
