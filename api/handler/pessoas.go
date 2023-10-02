@@ -21,7 +21,6 @@ type PessoaRequest struct {
 }
 
 type Handler interface {
-	Test(w http.ResponseWriter, r *http.Request)
 	Create(w http.ResponseWriter, r *http.Request)
 	Get(w http.ResponseWriter, r *http.Request)
 	Search(w http.ResponseWriter, r *http.Request)
@@ -46,7 +45,7 @@ func (phandler *pessoaHandler) Create(w http.ResponseWriter, r *http.Request) {
 	err := decoder.Decode(&pessoaParams)
 
 	if err != nil {
-		respondWithError(w, http.StatusBadRequest, "Bad Request")
+		respondWithError(w, http.StatusBadRequest)
 		return
 	}
 
@@ -60,26 +59,27 @@ func (phandler *pessoaHandler) Create(w http.ResponseWriter, r *http.Request) {
 	valid := validate(newPessoa)
 
 	if valid == false {
-		respondWithError(w, http.StatusUnprocessableEntity, "unprocessable entity")
+		respondWithError(w, http.StatusUnprocessableEntity)
 		return
 	}
 
 	newPessoa.UUID = uuid.New()
 
+	fmt.Println("IDFJDSFK")
 	err, pessoaUid := phandler.service.Create(context.Background(), newPessoa)
 
 	if err != nil {
 		fmt.Println("Error:", err)
 		if err.Error() == "pessoa already exists" {
-			respondWithError(w, http.StatusUnprocessableEntity, "unprocessable entity")
+			respondWithError(w, http.StatusUnprocessableEntity)
 			return
 		}
-		respondWithError(w, 500, "internal server error")
+		respondWithError(w, 500)
 		return
 	}
 
 	w.Header().Add("Location", fmt.Sprintf("/pessoas/%s", pessoaUid))
-	respondWithJSON(w, 201, pessoaUid)
+	respondWithJSON(w, 201)
 }
 
 func (phandler *pessoaHandler) Get(w http.ResponseWriter, r *http.Request) {
@@ -87,7 +87,7 @@ func (phandler *pessoaHandler) Get(w http.ResponseWriter, r *http.Request) {
 	uid, err := uuid.Parse(id)
 
 	if err != nil {
-		respondWithError(w, 400, "id not formatted")
+		respondWithError(w, 400)
 		return
 	}
 
@@ -95,16 +95,16 @@ func (phandler *pessoaHandler) Get(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		fmt.Println("Error:", err)
-		respondWithError(w, 500, "internal server error")
+		respondWithError(w, 500)
 		return
 	}
 
 	if pessoa.Nome == "" {
-		respondWithError(w, 404, "Not Found")
+		respondWithError(w, 404)
 		return
 	}
 
-	respondWithJSON(w, 200, pessoa)
+	respondWithJSON(w, 200)
 	return
 }
 
@@ -112,7 +112,7 @@ func (phandler *pessoaHandler) Search(w http.ResponseWriter, r *http.Request) {
 	term := r.URL.Query().Get("t")
 
 	if term == "" {
-		respondWithError(w, 400, "t query string is required")
+		respondWithError(w, 400)
 		return
 	}
 
@@ -124,11 +124,11 @@ func (phandler *pessoaHandler) Search(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		fmt.Println("Error:", err)
-		respondWithError(w, 500, "internal server error")
+		respondWithError(w, 500)
 		return
 	}
 
-	respondWithJSON(w, 200, pessoaList)
+	respondWithJSON(w, 200)
 	return
 }
 
@@ -137,19 +137,18 @@ func (phandler *pessoaHandler) Count(w http.ResponseWriter, r *http.Request) {
 	err, count := phandler.service.Count(context.Background())
 	if err != nil {
 		fmt.Println("Error no count", err)
-		respondWithError(w, 500, "internal server error")
+		respondWithError(w, 500)
 		return
 	}
 
-	respondWithJSON(w, 200, count)
+	w.Header().Add("Content-Type", "application/json")
+	w.WriteHeader(200)
+
+	data, err := json.Marshal(count)
+
+	w.Write(data)
+
 	return
-}
-
-func (phandler *pessoaHandler) Test(w http.ResponseWriter, r *http.Request) {
-
-	phandler.service.Test(context.Background())
-
-	w.WriteHeader(303)
 }
 
 func validate(pessoa domain.Pessoa) bool {

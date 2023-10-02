@@ -8,7 +8,6 @@ import (
 
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/joho/godotenv"
-	"github.com/redis/rueidis"
 	"github.com/teohen/rinha-de-backend/api/routes"
 )
 
@@ -25,8 +24,8 @@ func main() {
 		log.Fatal("Couldn parse config", err)
 	}
 
-	poolConfig.MaxConns = 150
-	poolConfig.MinConns = 100
+	poolConfig.MaxConns = 80
+	poolConfig.MinConns = 10
 
 	db, err := pgxpool.NewWithConfig(context.Background(), poolConfig)
 
@@ -34,19 +33,9 @@ func main() {
 		log.Fatal("Couldnt create conn pool", err)
 	}
 
-	redisClient, err := rueidis.NewClient(
-		rueidis.ClientOption{InitAddress: []string{os.Getenv("REDIS_HOST") + ":6379"}},
-	)
-
-	if err != nil {
-		log.Fatal("Couldnt connect with redis", err)
-	}
-
 	defer db.Close()
 
-	defer redisClient.Close()
-
-	server := routes.NewServer(db, redisClient)
+	server := routes.NewServer(db)
 
 	log.Printf("Server running")
 
