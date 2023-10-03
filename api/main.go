@@ -15,7 +15,7 @@ func main() {
 
 	godotenv.Load()
 
-	var psqlconn string = fmt.Sprintf("host=%s user=%s password=%s dbname=%s sslmode=disable", os.Getenv("DB_HOST"),
+	var psqlconn string = fmt.Sprintf("host=%s user=%s password=%s dbname=%s", os.Getenv("DB_HOST"),
 		os.Getenv("DB_USER"), os.Getenv("DB_PASSWORD"), os.Getenv("DB_NAME"))
 
 	poolConfig, err := pgxpool.ParseConfig(psqlconn)
@@ -24,7 +24,7 @@ func main() {
 		log.Fatal("Couldn parse config", err)
 	}
 
-	poolConfig.MaxConns = 80
+	poolConfig.MaxConns = 100
 	poolConfig.MinConns = 10
 
 	db, err := pgxpool.NewWithConfig(context.Background(), poolConfig)
