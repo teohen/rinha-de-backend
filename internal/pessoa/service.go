@@ -3,7 +3,6 @@ package pessoa
 import (
 	"context"
 	"errors"
-	"fmt"
 
 	"github.com/google/uuid"
 	"github.com/teohen/rinha-de-backend/internal/domain"
@@ -30,7 +29,6 @@ func NewService(r Repository) Service {
 func (p *pessoaService) Create(ctx context.Context, pessoa domain.Pessoa) (error, uuid.UUID) {
 	err, pessoaRegistered := p.repository.GetByApelido(ctx, pessoa.Apelido)
 
-	fmt.Println("pessoa registered", pessoaRegistered)
 	if pessoaRegistered.UUID != uuid.Nil {
 
 		return errors.New("pessoa already exists"), uuid.Nil

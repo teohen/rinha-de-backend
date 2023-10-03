@@ -65,7 +65,6 @@ func (phandler *pessoaHandler) Create(w http.ResponseWriter, r *http.Request) {
 
 	newPessoa.UUID = uuid.New()
 
-	fmt.Println("IDFJDSFK")
 	err, pessoaUid := phandler.service.Create(context.Background(), newPessoa)
 
 	if err != nil {
@@ -128,7 +127,16 @@ func (phandler *pessoaHandler) Search(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	respondWithJSON(w, 200)
+	data, err := json.Marshal(pessoaList)
+
+	if err != nil {
+		fmt.Println("error serializing pessoaList to json")
+		w.WriteHeader(500)
+		return
+	}
+
+	w.WriteHeader(200)
+	w.Write(data)
 	return
 }
 

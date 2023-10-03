@@ -67,7 +67,6 @@ func (p *pessoaRepository) Get(ctx context.Context, id uuid.UUID) (error, domain
 }
 
 func (p *pessoaRepository) GetByApelido(ctx context.Context, apelido string) (error, domain.Pessoa) {
-	fmt.Println("skdfjsdkfj")
 	pessoa := domain.Pessoa{}
 
 	var stack string
