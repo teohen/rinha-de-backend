@@ -1,7 +1,7 @@
 version: '3.5'
 services:
   api1: # API - Instância 01
-    image: teohen/rinha-de-backend:local
+    image: teohen/rinha-de-backend
     hostname: api1
     environment:
       - HTTP_PORT=8081
@@ -21,7 +21,7 @@ services:
 
 
   api2: # API - Instância 01
-    image: teohen/rinha-de-backend:local
+    image: teohen/rinha-de-backend
     hostname: api2
     depends_on:
       - postgres
